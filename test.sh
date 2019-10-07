@@ -40,7 +40,7 @@ then
     if [[ -n "${missing}" ]]; then
         echo "boilerplate missing: $missing"
         echo "consider running: ${BDIR}/fix.sh"
-        ((exitcode += 8))
+   #     ((exitcode += 8))
     else
         echo "ok"
     fi
