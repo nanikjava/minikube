@@ -1,3 +1,19 @@
+/*
+Copyright 2019 The Kubernetes Authors All rights reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package main
 
 import (
@@ -34,9 +50,6 @@ func main() {
 	if *boilerplatedir == cwd {
 		fmt.Println("-----same directory")
 	}
-	fmt.Println("-----> Template/boilerplate directory  = " + *boilerplatedir)
-	fmt.Println("-----> Root directory = " + *rootdir)
-
 	// the different regex that will be used for processing the files
 	/*
 		go_build_constraints --> to check whether the file contains // +build - <something_something>
@@ -55,11 +68,11 @@ func main() {
 	// process the file
 	for _, filename := range filestoprocess {
 		if !isFileValid(filename) {
-			fmt.Printf("\nFilename = %s %s", filename, " is not valid")
+			_, f := filepath.Split(filename)
+			fmt.Printf("%s\n", f)
 		}
 	}
 
-	fmt.Printf("\nProcessing done....\n")
 }
 
 func check(e error) {
@@ -175,7 +188,6 @@ func getFiles() {
 		// function is in the skippedDirs array
 		for _, skipdir := range skippedDirs {
 			if fileinfo.IsDir() && fileinfo.Name() == skipdir {
-				fmt.Printf("\nDirectory %s will be skipped", fileinfo.Name())
 				// return with filepath.SkipDir so that this
 				// directory will not be traversed into..
 				return filepath.SkipDir
