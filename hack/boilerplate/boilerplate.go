@@ -17,21 +17,21 @@ var (
 	boilerplatedir *string
 	rootdir        *string
 	refs           map[string][]string
-	skipped_dirs          = [...]string{"Godeps", "third_party", "gopath", "_output", ".git", "cluster/env.sh", "vendor", "test/e2e/generated/bindata.go"}
+	skippedDirs    = []string{`Godeps`, `third_party`, `gopath`, `_output`, `.git`, `cluster/env.sh`, `vendor`, `test/e2e/generated/bindata.go`}
 	filestoprocess []string
-	m                                = make(map[string]*regexp.Regexp)
+	m              = make(map[string]*regexp.Regexp)
 )
 
-func init(){
-	cwd , _ = os.Getwd()
-	boilerplatedir  = flag.String("boilerplate-dir", cwd, "Boilerplate directory for boilerplate files")
-	cwd = cwd + "/../../"
-	rootdir  = flag.String("rootdir",  filepath.Dir(cwd), "Root directory to examine")
+func init() {
+	cwd, _ = os.Getwd()
+	boilerplatedir = flag.String("boilerplate-dir", cwd, "Boilerplate directory for boilerplate files")
+	cwd += "/../../"
+	rootdir = flag.String("rootdir", filepath.Dir(cwd), "Root directory to examine")
 }
 
 func main() {
 	flag.Parse()
-	if (*boilerplatedir == cwd){
+	if *boilerplatedir == cwd {
 		fmt.Println("-----same directory")
 	}
 	fmt.Println("-----> Template/boilerplate directory  = " + *boilerplatedir)
@@ -46,16 +46,16 @@ func main() {
 	*/
 	m["go_build_constraints"] = regexp.MustCompile(`(?m)^(// \+build.*\n)+\n`)
 	m["year"] = regexp.MustCompile(`YEAR`)
-	m["date"]= regexp.MustCompile(`(20[123]\d)`)
-	m["shebang"]= regexp.MustCompile(`^(#!.*\n)\n*`)
+	m["date"] = regexp.MustCompile(`(20[123]\d)`)
+	m["shebang"] = regexp.MustCompile(`^(#!.*\n)\n*`)
 
 	getRefs()
 	getFiles()
 
 	// process the file
 	for _, filename := range filestoprocess {
-		if (!isFileValid(filename)) {
-			fmt.Printf("\nFilename = %s %s", filename , " is not valid")
+		if !isFileValid(filename) {
+			fmt.Printf("\nFilename = %s %s", filename, " is not valid")
 		}
 	}
 
@@ -75,23 +75,23 @@ is valid.
 Returning false means that the file does not the
 proper boilerplate template
 */
-func isFileValid(filename string) (bool) {
+func isFileValid(filename string) bool {
 	dat, err := ioutil.ReadFile(filename)
 	check(err)
 
 	filecontent := string(dat)
-	filextension :=  filepath.Ext(filename)
+	filextension := filepath.Ext(filename)
 	var re = regexp.MustCompile(`(?m)(.[^.]+)`)
 
 	currentfilextension := re.FindString(filextension)
 	templatecontent := refs[currentfilextension]
-	currentRegex := m["go_build_constraints"]
+	var currentRegex = m["go_build_constraints"]
 
 	// if the file has .go extension than
 	// use the go_build_constraints regex
-	if (currentfilextension == ".go") {
+	if currentfilextension == ".go" {
 		currentRegex = m["go_build_constraints"]
-		if (currentRegex.MatchString(filecontent)) {
+		if currentRegex.MatchString(filecontent) {
 			// if it has a match then replace the matched string with empty string
 			// this will remove the '+build' string
 			filecontent = currentRegex.ReplaceAllString(filecontent, "")
@@ -99,9 +99,9 @@ func isFileValid(filename string) (bool) {
 	}
 
 	// use the shebang regex for .sh file
-	if (currentfilextension == ".sh") {
+	if currentfilextension == ".sh" {
 		currentRegex = m["shebang"]
-		if (currentRegex.MatchString(filecontent)) {
+		if currentRegex.MatchString(filecontent) {
 			// this will replace the !/bin/bash with empty string
 			filecontent = currentRegex.ReplaceAllString(filecontent, "")
 		}
@@ -127,7 +127,7 @@ func isFileValid(filename string) (bool) {
 	// the file contain the YEAR string
 	currentRegex = m["year"]
 	for _, content := range filecontentstringarray {
-		if (currentRegex.MatchString(content)) {
+		if currentRegex.MatchString(content) {
 			// if there is a match than means the template
 			// is no good...
 			return false
@@ -149,20 +149,14 @@ func isFileValid(filename string) (bool) {
 		left is to check the complete string of the file and template to see
 		if they are the same
 	*/
-	if (! assertEq(filecontentstringarray, templatecontent) ) {
-		return false
-	}
-
-	// if everything is good that means the file does not need to
-	// be worked on ....
-	return true
+	return IsContentTheSame(filecontentstringarray, templatecontent)
 }
 
 /*
 Function to just a normal deep equal check
 between 2 different string array
 */
-func assertEq(test []string, ans []string) bool {
+func IsContentTheSame(test []string, ans []string) bool {
 	return reflect.DeepEqual(test, ans)
 }
 
@@ -178,8 +172,8 @@ func getFiles() {
 		}
 
 		// check the see if the directory being send to this
-		// function is in the skipped_dirs array
-		for _, skipdir := range skipped_dirs {
+		// function is in the skippedDirs array
+		for _, skipdir := range skippedDirs {
 			if fileinfo.IsDir() && fileinfo.Name() == skipdir {
 				fmt.Printf("\nDirectory %s will be skipped", fileinfo.Name())
 				// return with filepath.SkipDir so that this
@@ -190,17 +184,17 @@ func getFiles() {
 
 		// if directory is not to be skipped then check the file extension
 		// check to make sure that this is not a directory
-		if (! fileinfo.IsDir()) {
+		if !fileinfo.IsDir() {
 			// check if the extension exist in the ref variable
-			filextension :=  filepath.Ext(fpath)
+			filextension := filepath.Ext(fpath)
 			var re = regexp.MustCompile(`(?m)(.[^.]+)`)
-			for k,_:= range refs {
+			for k := range refs {
 
 				// if the key (that contain the extension name)
 				// is the same as the filename extension then we have
 				// a match, so we need to add the filename to the
 				// availabefiles variables to be processed later
-				if ( k == re.FindString(filextension)) {
+				if k == re.FindString(filextension) {
 					filestoprocess = append(filestoprocess, fpath)
 				}
 			}
@@ -227,16 +221,15 @@ end result of the map will be like:
 	.sh --> <template_string>
 
 */
-func getRefs(){
+func getRefs() {
 	matches, err := filepath.Glob(*boilerplatedir + "/boilerplate.*.txt")
-
 
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	if len(matches) != 0 {
-		refs=make(map[string][]string,len(matches))
+		refs = make(map[string][]string, len(matches))
 
 		for i := 0; i < len(matches); i++ {
 			var splitString []string
@@ -259,19 +252,19 @@ func getRefs(){
 			s := bufio.NewScanner(_file)
 			for s.Scan() {
 				// read per line
-				read_line := s.Text()
+				readline := s.Text()
 
 				// append it into the string
-				splitString = append(splitString, read_line)
+				splitString = append(splitString, readline)
 			}
 
 			// regex to get the first . of the file as the filename
 			// will be in the format eg: boilerplate.<lang>.txt
-			// The first occurence of the . (dot) will be the extension
+			// The first occurrence of the . (dot) will be the extension
 			// eg: boilerplate.go.txt
 			// it will give us .go
 			var re = regexp.MustCompile(`(?m)(.[^.]+)`)
-			var matchall  =  re.FindAllString(file, -1)
+			var matchall = re.FindAllString(file, -1)
 
 			// get the extension of the file and use it as a key
 			if len(matchall) > 0 {
