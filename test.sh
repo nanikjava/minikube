@@ -35,7 +35,7 @@ then
     echo "= boilerplate ==========================================================="
     readonly GO=$(type -P go || echo docker run --rm -it -v $(pwd):/minikube -w /minikube go go)
     readonly BDIR="./hack/boilerplate"
-    missing="$($GO run ${BDIR}/boilerplate.go --rootdir . --boilerplate-dir ${BDIR} | egrep -v '/assets.go|/translations.go|/site/themes/|/site/node_modules|\./out|/hugo/' || true)"
+    missing="$($GO run ${BDIR}/boilerplate.go --rootdir . --boilerplate-dir ${BDIR} | egrep -v 'assets.go|translations.go|/site/themes/|/site/node_modules|\./out|/hugo/' || true)"
     if [[ -n "${missing}" ]]; then
         echo "boilerplate missing: $missing"
         echo "consider running: ${BDIR}/fix.sh"
