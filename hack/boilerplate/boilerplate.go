@@ -70,6 +70,7 @@ func main() {
 		if !isFileValid(filename) {
 			_, f := filepath.Split(filename)
 			fmt.Printf("%s\n", f)
+			fmt.Printf("*****%s\n", filename)
 		}
 	}
 
