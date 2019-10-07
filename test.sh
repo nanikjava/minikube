@@ -37,10 +37,11 @@ then
     readonly GO=$(type -P go)
     readonly BDIR="./hack/boilerplate"
     missing="$($GO run ${BDIR}/boilerplate.go --rootdir . --boilerplate-dir ${BDIR} | egrep -v 'assets.go|translations.go|/site/themes/|/site/node_modules|\./out|/hugo/' || true)"
+    echo "..... ${missing} ........ "
     if [[ -n "${missing}" ]]; then
         echo "boilerplate missing: $missing"
         echo "consider running: ${BDIR}/fix.sh"
-   #     ((exitcode += 8))
+        ((exitcode += 8))
     else
         echo "ok"
     fi
